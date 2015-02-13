@@ -37,8 +37,6 @@ I keep my url and location in a config, and password in a credentials file.
   
 Methods
 ---
-### add(magnet, callback)
+### add(magnet, callback) or add(file, callback)
 
 Call add with a magnet link to automatically post the add request to your deluge-web server. If successful, it will add and start downloading without further action.
-
-### add(file, callback)
