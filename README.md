@@ -19,9 +19,11 @@ Basic usage
 deluge = require('deluge')(delugeUrl, password, downloadLocation);
 ```
 
-delugeUrl is the address of your deluge-web server with "json" appended. ex http://192.168.0.100:8112/json
-password is the password of your deluge-web server - default "deluge".
-downloadLocation is the target path to save your download. ex. /media/USBHDD1/share/downloading
+**delugeUrl** is the address of your deluge-web server with "json" appended. ex http://192.168.0.100:8112/json
+
+**password** is the password of your deluge-web server - default "deluge".
+
+**downloadLocation** is the target path to save your download. ex. /media/USBHDD1/share/downloading
 
 I keep my url and location in a config, and password in a credentials file.
 ```
