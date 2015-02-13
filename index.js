@@ -34,6 +34,9 @@ module.exports = function(deluge_url, password, download_location) {
     add: function(magnet, callback) {
       if (connected) {
         add(magnet, callback);
+      } else {
+        //feel free to add connection monitoring.
+        console.error("Attempted to add to deluge, but not connected.");
       }
     }
   }
