@@ -1,6 +1,6 @@
 {
   "name": "deluge-manager",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "add magnet links and torrents to deluge",
   "main": "index.js",
   "scripts": {
