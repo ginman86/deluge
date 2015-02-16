@@ -14,9 +14,9 @@
         PASSWORD = password;
 
         return {
-            add: function (magnet, dlpath, callback) {
+            add: function (magnet, dlPath, callback) {
                 if (connected) {
-                    add(magnet, dlpath, callback);
+                    add(magnet, dlPath, callback);
                 } else {
                     auth(function (err, result, response) {
                         if (!err) {
@@ -27,7 +27,7 @@
                                 if (!err) {
                                     connected = true;
                                     console.log('Connected to deluge on ' + deluge_url);
-                                    add(magnet, dlpath, callback);
+                                    add(magnet, dlPath, callback);
                                 }
                             });
                         } else {
@@ -82,22 +82,23 @@
         });
     }
 
-    function add(torrent, dlpath, callback) {
+    function add(torrent, dlPath, callback) {
         if (validUrl.isWebUri(torrent)) {
             downloadTorrentFile(torrent, function (error, result) {
                 if (error) {
                     callback(error);
                     return;
                 }
-                addTorrent(result, dlpath, callback);
+                addTorrent(result, dlPath, callback);
 
             })
         } else {
-            addTorrent(torrent, dlpath, callback);
+            addTorrent(torrent, dlPath, callback);
         }
     }
 
     function addTorrent(magnet, dlPath, callback) {
+        console.log("Adding: " + magnet);
         post({
             method: 'web.add_torrents',
             id: 1,
@@ -115,7 +116,18 @@
                     prioritize_first_last_pieces: false
                 }
             }]]
-        }, callback);
+        }, function (error, result) {
+            if (error) {
+                callback(error);
+                return;
+            }
+            result = JSON.parse(result);
+            if (result['error']) {
+                callback(result['error']);
+                return;
+            }
+            callback(null, result['result']);
+        });
     }
 
     function post(body, callback) {
