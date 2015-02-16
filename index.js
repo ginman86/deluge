@@ -1,110 +1,142 @@
-'use strict';
+(function () {
+    'use strict';
+    var restler = require('restler');
+    var validUrl = require('valid-url');
 
-var restler = require('restler');
+    var connected = false;
 
-var  connected = false;
+    var PASSWORD,
+        DELUGE_URL,
+        SESSION_COOKIE = '';
 
-var DOWNLOAD_LOCATION,
-    PASSWORD,
-    DELUGE_URL,
-    SESSION_COOKIE = '';
+    module.exports = function (deluge_url, password) {
+        DELUGE_URL = deluge_url;
+        PASSWORD = password;
 
-module.exports = function(deluge_url, password, download_location) {
-    DELUGE_URL = deluge_url;
-    PASSWORD = password;
-    DOWNLOAD_LOCATION = download_location;
+        return {
+            add: function (magnet, dlpath, callback) {
+                if (connected) {
+                    add(magnet, dlpath, callback);
+                } else {
+                    auth(function (err, result, response) {
+                        if (!err) {
+                            SESSION_COOKIE = getCookie(response.headers);
+                            console.log('Authenticated with deluge server...');
 
-    auth(function(err, result, response) {
-      if (!err) {
-        SESSION_COOKIE = getCookie(response.headers);
-        console.log('Authenticated with deluge server...');
+                            isConnected(function (err) {
+                                if (!err) {
+                                    connected = true;
+                                    console.log('Connected to deluge on ' + deluge_url);
+                                    add(magnet, dlpath, callback);
+                                }
+                            });
+                        } else {
+                            console.error('Problems connecting to deluge: ', err, response.error);
+                        }
+                    });
+                }
+            }
+        }
+    };
 
-        isConnected(function(err) {
-          if (!err) {
-            connected = true;
-            console.log('Connected to deluge on ' + deluge_url);
-          }
+    function auth(callback) {
+        post({
+            id: 1,
+            params: [PASSWORD],
+            method: 'auth.login'
+        }, callback);
+    }
+
+    function isConnected(callback) {
+        post({
+            id: 1,
+            method: 'web.connected',
+            params: []
+        }, callback);
+    }
+
+    function getHosts(callback) {
+        post({
+            method: 'web.get_hosts',
+            params: [],
+            id: 1
+        }, callback);
+    }
+
+    /**
+     * Download a torrent file from an url
+     * @param url
+     * @param callback containing the error and the path where the torrent file have been downloaded
+     */
+    function downloadTorrentFile(url, callback) {
+        post({
+            method: 'web.download_torrent_from_url',
+            id: 1,
+            params: [url]
+        }, function (error, result) {
+            if (error) {
+                callback(error);
+                return;
+            }
+            callback(null, JSON.parse(result).result);
         });
-      } else {
-        console.error('Problems connecting to deluge: ', err, response.error);
-      }
-    });
-
-  return {
-    add: function(magnet, callback) {
-      if (connected) {
-        add(magnet, callback);
-      } else {
-        //feel free to add connection monitoring.
-        console.error("Attempted to add to deluge, but not connected.");
-      }
     }
-  }
-};
 
-function auth(callback) {
-  post({
-    id: 1,
-    params: [PASSWORD],
-    method: 'auth.login'
-  }, callback);
-}
+    function add(torrent, dlpath, callback) {
+        if (validUrl.isWebUri(torrent)) {
+            downloadTorrentFile(torrent, function (error, result) {
+                if (error) {
+                    callback(error);
+                    return;
+                }
+                addTorrent(result, dlpath, callback);
 
-function isConnected(callback) {
-  post({
-    id: 1,
-    method: 'web.connected',
-    params: []
-  }, callback);
-}
-
-function getHosts(callback) {
-  post({
-    method: 'web.get_hosts',
-    params:[],
-    id:1
-  }, callback);
-}
-
-function add(magnet, callback) {
-  post({
-    method: 'web.add_torrents',
-    id: 1,
-    params: [[{
-      path: magnet,
-      options:{
-        file_priorities:[],
-        add_paused: false,
-        compact_allocation: false,
-        download_location: DOWNLOAD_LOCATION,
-        max_connections: -1,
-        max_download_speed: -1,
-        max_upload_slots: -1,
-        max_upload_speed: -1,
-        prioritize_first_last_pieces: false
-      }
-    }]],
-  }, callback);
-}
-
-function post(body, callback) {
-  restler.postJson(DELUGE_URL, body, {
-    headers: {
-      'Cookie': SESSION_COOKIE
+            })
+        } else {
+            addTorrent(torrent, dlpath, callback);
+        }
     }
-  })
-  .on('success', function(result, response) {
-    callback(result.error, result, response);
-  });
-}
 
-function getCookie(headers)
-{
-  var cookie;
+    function addTorrent(magnet, dlPath, callback) {
+        post({
+            method: 'web.add_torrents',
+            id: 1,
+            params: [[{
+                path: magnet,
+                options: {
+                    file_priorities: [],
+                    add_paused: false,
+                    compact_allocation: false,
+                    download_location: dlPath,
+                    max_connections: -1,
+                    max_download_speed: -1,
+                    max_upload_slots: -1,
+                    max_upload_speed: -1,
+                    prioritize_first_last_pieces: false
+                }
+            }]]
+        }, callback);
+    }
 
-  if (headers && headers['set-cookie']) {
-    cookie = headers['set-cookie'][0].split(';')[0];
-  }
+    function post(body, callback) {
+        restler.postJson(DELUGE_URL, body, {
+            headers: {
+                'Cookie': SESSION_COOKIE
+            }
+        })
+            .on('success', function (result, response) {
+                callback(result.error, result, response);
+            });
+    }
 
-  return cookie;
-}
+    function getCookie(headers) {
+        var cookie;
+
+        if (headers && headers['set-cookie']) {
+            cookie = headers['set-cookie'][0].split(';')[0];
+        }
+
+        return cookie;
+    }
+
+})();

@@ -23,20 +23,10 @@ deluge = require('deluge')(delugeUrl, password, downloadLocation);
 
 **password** is the password of your deluge-web server - default "deluge".
 
-**downloadLocation** is the target path to save your download. ex. /media/USBHDD1/share/downloading
-
-I keep my url and location in a config, and password in a credentials file.
-```
-  clients: {
-    deluge: {
-      url: "http://192.168.0.100:8112/json",
-      downloadLocation: "/media/USBHDD1/share/downloading"
-    }
-  }
-  ```
   
 Methods
 ---
-### add(magnet, callback) or add(file, callback)
+### add(magnet, dlpath callback) or add(file, dlpath, callback) or add(url, dlpath, callback)
 
 Call add with a magnet link to automatically post the add request to your deluge-web server. If successful, it will add and start downloading without further action.
+You can also use a direct url to a torrent file, deluge will download the file and star the download
