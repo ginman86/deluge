@@ -1,4 +1,4 @@
-deluge [![NPM Version](https://img.shields.io/npm/v/deluge.svg?style=flat)](https://www.npmjs.com/package/deluge) ![Node Version](https://img.shields.io/node/v/deluge.svg?style=flat) ![Downloads](https://img.shields.io/npm/dm/deluge.svg?style=flat)
+deluge-manager  [![NPM Version](https://img.shields.io/npm/v/deluge-manager.svg?style=flat)](https://www.npmjs.com/package/deluge-manager) ![Node Version](https://img.shields.io/node/v/deluge-manager.svg?style=flat) ![Downloads](https://img.shields.io/npm/dm/deluge-manager.svg?style=flat)
 =======
 
 Licensed under the MIT-LICENSE
@@ -9,34 +9,24 @@ Installing
 ----------
 
 ```
-npm install deluge
+npm install deluge-manager
 ```
 
 Basic usage
 ---
 
 ```
-deluge = require('deluge')(delugeUrl, password, downloadLocation);
+deluge = require('deluge-manager')(delugeUrl, password);
 ```
 
 **delugeUrl** is the address of your deluge-web server with "json" appended. ex http://192.168.0.100:8112/json
 
 **password** is the password of your deluge-web server - default "deluge".
 
-**downloadLocation** is the target path to save your download. ex. /media/USBHDD1/share/downloading
-
-I keep my url and location in a config, and password in a credentials file.
-```
-  clients: {
-    deluge: {
-      url: "http://192.168.0.100:8112/json",
-      downloadLocation: "/media/USBHDD1/share/downloading"
-    }
-  }
-  ```
   
 Methods
 ---
-### add(magnet, callback) or add(file, callback)
+### add(magnet, dlpath callback) or add(file, dlpath, callback) or add(url, dlpath, callback)
 
 Call add with a magnet link to automatically post the add request to your deluge-web server. If successful, it will add and start downloading without further action.
+You can also use a direct url to a torrent file, deluge will download the file and star the download

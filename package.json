@@ -1,6 +1,6 @@
 {
-  "name": "deluge",
-  "version": "0.1.0",
+  "name": "deluge-manager",
+  "version": "1.5.0",
   "description": "add magnet links and torrents to deluge",
   "main": "index.js",
   "scripts": {
@@ -8,22 +8,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ginman86/deluge.git"
+    "url": "https://github.com/Belphemur/deluge-manager.git"
   },
   "keywords": [
     "deluge",
     "deluge-webui",
     "torrent"
   ],
-  "author": "Greg Inman <ginman86@gmail.com> (https://github.com/ginman86)",
+  "author": "Antoine Aflalo <antoineaf+npm@admincmd.com>",
 
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ginman86/deluge/issues"
+    "url": "https://github.com/Belphemur/deluge-manager/issues"
   },
   "dependencies": {
-    "restler": "git://github.com/ginman86/restler"
+    "restler": "git://github.com/ginman86/restler",
+    "valid-url": "1.0.x"
   },
   "readmeFilename": "README.md",
-  "homepage": "https://github.com/ginman86/deluge"
+  "homepage": "https://github.com/Belphemur/deluge-manager"
 }
