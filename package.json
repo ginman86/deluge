@@ -19,14 +19,14 @@
   "contributors": [{
     "name": "Antoine Aflalo",
     "email": "antoineaf+npm@admincmd.com"
-  }]
-
+  }],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ginman86/deluge/issues"
   },
   "dependencies": {
-    "restler": "git://github.com/ginman86/restler"
+    "restler": "git://github.com/ginman86/restler",
+    "valid-url": "1.0.x"
   },
   "readmeFilename": "README.md",
   "homepage": "https://github.com/ginman86/deluge"
