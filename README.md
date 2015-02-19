@@ -1,4 +1,4 @@
-deluge-manager  [![NPM Version](https://img.shields.io/npm/v/deluge-manager.svg?style=flat)](https://www.npmjs.com/package/deluge-manager) ![Node Version](https://img.shields.io/node/v/deluge-manager.svg?style=flat) ![Downloads](https://img.shields.io/npm/dm/deluge-manager.svg?style=flat)
+deluge  [![NPM Version](https://img.shields.io/npm/v/deluge.svg?style=flat)](https://www.npmjs.com/package/deluge) ![Node Version](https://img.shields.io/node/v/deluge.svg?style=flat) ![Downloads](https://img.shields.io/npm/dm/deluge.svg?style=flat)
 =======
 
 Licensed under the MIT-LICENSE
@@ -9,21 +9,21 @@ Installing
 ----------
 
 ```
-npm install deluge-manager
+npm install deluge
 ```
 
 Basic usage
 ---
 
 ```
-deluge = require('deluge-manager')(delugeUrl, password);
+deluge = require('deluge')(delugeUrl, password);
 ```
 
 **delugeUrl** is the address of your deluge-web server with "json" appended. ex http://192.168.0.100:8112/json
 
 **password** is the password of your deluge-web server - default "deluge".
 
-  
+
 Methods
 ---
 ### add(magnet, dlpath callback) or add(file, dlpath, callback) or add(url, dlpath, callback)
