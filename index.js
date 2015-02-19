@@ -15,29 +15,59 @@
 
         return {
             add: function (magnet, dlPath, callback) {
-                if (connected) {
+                executeApiCall(function () {
                     add(magnet, dlPath, callback);
-                } else {
-                    auth(function (err, result, response) {
-                        if (!err) {
-                            SESSION_COOKIE = getCookie(response.headers);
-                            console.log('Authenticated with deluge server...');
-
-                            isConnected(function (err) {
-                                if (!err) {
-                                    connected = true;
-                                    console.log('Connected to deluge on ' + deluge_url);
-                                    add(magnet, dlPath, callback);
-                                }
-                            });
-                        } else {
-                            console.error('Problems connecting to deluge: ', err, response.error);
-                        }
-                    });
-                }
+                })
             }
         }
     };
+
+    function authenticate(callback) {
+        auth(function (err, result, response) {
+            if (!err) {
+                SESSION_COOKIE = getCookie(response.headers);
+                console.log('Authenticate with deluge server...');
+
+                isConnected(function (err, result) {
+                    if (!err && result) {
+                        connected = true;
+                        console.log('Connected to deluge on ' + DELUGE_URL);
+                        callback();
+                    } else {
+                        console.error('Deluge-web not connected to deluge damon');
+                    }
+                });
+            } else {
+                console.error('Problems connecting to deluge: ', err, response.error);
+            }
+        });
+    }
+
+    /**
+     * Connect if not connected then execute the callback method
+     * @param callback
+     */
+    function executeApiCall(callback) {
+        if (connected) {
+            checkSession(function (error, result) {
+                if (error || !result) {
+                    authenticate(callback);
+                } else {
+                    callback();
+                }
+            })
+        } else {
+            authenticate(callback);
+        }
+    }
+
+    function checkSession(callback) {
+        post({
+            id: 1,
+            params: [SESSION_COOKIE],
+            method: 'auth.check_session'
+        }, callback);
+    }
 
     function auth(callback) {
         post({
@@ -63,6 +93,15 @@
         }, callback);
     }
 
+    function decodeServerResponse(result, callback, response) {
+        result = JSON.parse(result);
+        if (result['error']) {
+            callback(result['error'], null, response);
+            return;
+        }
+        callback(null, result['result'], response);
+    }
+
     /**
      * Download a torrent file from an url
      * @param url
@@ -73,13 +112,7 @@
             method: 'web.download_torrent_from_url',
             id: 1,
             params: [url]
-        }, function (error, result) {
-            if (error) {
-                callback(error);
-                return;
-            }
-            callback(null, JSON.parse(result).result);
-        });
+        }, callback);
     }
 
     function add(torrent, dlPath, callback) {
@@ -116,18 +149,7 @@
                     prioritize_first_last_pieces: false
                 }
             }]]
-        }, function (error, result) {
-            if (error) {
-                callback(error);
-                return;
-            }
-            result = JSON.parse(result);
-            if (result['error']) {
-                callback(result['error']);
-                return;
-            }
-            callback(null, result['result']);
-        });
+        }, callback);
     }
 
     function post(body, callback) {
@@ -137,7 +159,7 @@
             }
         })
             .on('success', function (result, response) {
-                callback(result.error, result, response);
+                decodeServerResponse(result, callback, response);
             });
     }
 
