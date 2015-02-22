@@ -19,6 +19,11 @@
                 executeApiCall(function () {
                     add(magnet, dlPath, callback);
                 })
+            },
+            getHosts: function (callback) {
+                executeApiCall(function () {
+                    getHostList(callback);
+                }, false)
             }
         }
     };
@@ -64,7 +69,13 @@
                 return;
             }
             if (needConnection) {
-                isConnected(callback);
+                isConnected(function (error, result) {
+                    if (error || !result) {
+                        console.error("[Deluge] WebUI not connected to a daemon");
+                        return;
+                    }
+                    callback(error, result);
+                });
             } else {
                 callback(error, result);
             }
@@ -96,11 +107,12 @@
             method: 'web.connected',
             params: []
         }, function (err, result) {
-            if (!err && result) {
-                connected = true;
-                console.log('[Deluge] Connected to deluge on ' + DELUGE_URL);
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, result);
             }
-            callback(err, result);
+
         });
     }
 
@@ -190,6 +202,14 @@
         }
 
         return cookie;
+    }
+
+    function getHostList(callback) {
+        post({
+            method: 'web.get_hosts',
+            id: 1,
+            params: []
+        }, callback);
     }
 
 })();
