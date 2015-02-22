@@ -4,15 +4,16 @@
     var validUrl = require('valid-url');
 
     var connected = false;
+    var isAuthentificated = false;
 
     var PASSWORD,
         DELUGE_URL,
-        SESSION_COOKIE = '';
+        SESSION_COOKIE = '',
+        HOST_ID;
 
     module.exports = function (deluge_url, password) {
         DELUGE_URL = deluge_url;
         PASSWORD = password;
-
         return {
             add: function (magnet, dlPath, callback) {
                 executeApiCall(function () {
@@ -23,42 +24,51 @@
     };
 
     function authenticate(callback) {
-        auth(function (err, result, response) {
-            if (!err) {
-                SESSION_COOKIE = getCookie(response.headers);
-                console.log('Authenticate with deluge server...');
+        function reAuth() {
+            auth(function (err, result, response) {
+                if (!err) {
+                    SESSION_COOKIE = getCookie(response.headers);
+                    console.log('Authenticate with deluge server...');
+                    isAuthentificated = true;
+                } else {
+                    console.error('Problems connecting to deluge: ', err, response.error);
+                }
+                callback(err, result);
+            });
+        }
 
-                isConnected(function (err, result) {
-                    if (!err && result) {
-                        connected = true;
-                        console.log('Connected to deluge on ' + DELUGE_URL);
-                        callback();
-                    } else {
-                        console.error('Deluge-web not connected to deluge damon');
-                    }
-                });
-            } else {
-                console.error('Problems connecting to deluge: ', err, response.error);
-            }
-        });
+        if (isAuthentificated) {
+            checkSession(function (error, result) {
+                if (error || !result) {
+                    reAuth();
+                }
+                else {
+                    callback(null, isAuthentificated);
+                }
+            })
+        } else {
+            reAuth();
+        }
+
     }
 
     /**
      * Connect if not connected then execute the callback method
      * @param callback
      */
-    function executeApiCall(callback) {
-        if (connected) {
-            checkSession(function (error, result) {
-                if (error || !result) {
-                    authenticate(callback);
-                } else {
-                    callback();
-                }
-            })
-        } else {
-            authenticate(callback);
-        }
+    function executeApiCall(callback, needConnection) {
+        needConnection = typeof needConnection !== 'undefined' ? needConnection : true;
+        authenticate(function (error, result) {
+            if (error || !result) {
+                callback(error, result);
+                return;
+            }
+            if (needConnection) {
+                isConnected(callback);
+            } else {
+                callback(error, result);
+            }
+        });
     }
 
     function checkSession(callback) {
@@ -66,7 +76,10 @@
             id: 1,
             params: [SESSION_COOKIE],
             method: 'auth.check_session'
-        }, callback);
+        }, function (error, result) {
+            isAuthentificated = error || !result;
+            callback(error, result);
+        });
     }
 
     function auth(callback) {
@@ -82,7 +95,13 @@
             id: 1,
             method: 'web.connected',
             params: []
-        }, callback);
+        }, function (err, result) {
+            if (!err && result) {
+                connected = true;
+                console.log('[Deluge] Connected to deluge on ' + DELUGE_URL);
+            }
+            callback(err, result);
+        });
     }
 
     function getHosts(callback) {
@@ -140,7 +159,7 @@
                 options: {
                     file_priorities: [],
                     add_paused: false,
-                    compact_allocation: false,
+                    compact_allocation: true,
                     download_location: dlPath,
                     max_connections: -1,
                     max_download_speed: -1,
