@@ -6,23 +6,44 @@
     var connected = false;
     var isAuthentificated = false;
 
+    var msgId = 0;
+
     var PASSWORD,
         DELUGE_URL,
-        SESSION_COOKIE = '',
-        HOST_ID;
+        SESSION_COOKIE = '';
 
     module.exports = function (deluge_url, password) {
         DELUGE_URL = deluge_url;
         PASSWORD = password;
         return {
+            /**
+             * Add the torrent to Deluge
+             * @param magnet
+             * @param dlPath
+             * @param callback
+             */
             add: function (magnet, dlPath, callback) {
                 executeApiCall(function () {
                     add(magnet, dlPath, callback);
                 })
             },
+            /**
+             * Get the list of all the hosts that the WebUI can connect to
+             * @param callback
+             */
             getHosts: function (callback) {
                 executeApiCall(function () {
                     getHostList(callback);
+                }, false)
+            },
+            /**
+             * Connect the WebUI to the wanted daemon
+             * @param hostID
+             * @param callback
+             */
+            connect: function (hostID, callback) {
+                executeApiCall(function () {
+                    connectToDaemon(hostID, callback);
                 }, false)
             }
         }
@@ -84,7 +105,6 @@
 
     function checkSession(callback) {
         post({
-            id: 1,
             params: [SESSION_COOKIE],
             method: 'auth.check_session'
         }, function (error, result) {
@@ -95,7 +115,6 @@
 
     function auth(callback) {
         post({
-            id: 1,
             params: [PASSWORD],
             method: 'auth.login'
         }, callback);
@@ -103,7 +122,6 @@
 
     function isConnected(callback) {
         post({
-            id: 1,
             method: 'web.connected',
             params: []
         }, function (err, result) {
@@ -119,8 +137,7 @@
     function getHosts(callback) {
         post({
             method: 'web.get_hosts',
-            params: [],
-            id: 1
+            params: []
         }, callback);
     }
 
@@ -141,7 +158,6 @@
     function downloadTorrentFile(url, callback) {
         post({
             method: 'web.download_torrent_from_url',
-            id: 1,
             params: [url]
         }, callback);
     }
@@ -165,7 +181,6 @@
         console.log("Adding: " + magnet);
         post({
             method: 'web.add_torrents',
-            id: 1,
             params: [[{
                 path: magnet,
                 options: {
@@ -184,6 +199,10 @@
     }
 
     function post(body, callback) {
+        body.id = ++msgId;
+        if (msgId > 1024) {
+            msgId = 0;
+        }
         restler.postJson(DELUGE_URL, body, {
             headers: {
                 'Cookie': SESSION_COOKIE
@@ -207,9 +226,31 @@
     function getHostList(callback) {
         post({
             method: 'web.get_hosts',
-            id: 1,
             params: []
-        }, callback);
+        }, function (error, result) {
+            if (error) {
+                callback(error);
+                return;
+            }
+            var hosts = [];
+            result.forEach(function (element, index) {
+                hosts[index] = {id: element[0], ip: element[1], port: element[2], status: element[3]};
+            });
+            callback(null, hosts);
+        });
+    }
+
+    function connectToDaemon(hostID, callback) {
+        post({
+            method: 'web.connect',
+            params: [hostID]
+        }, function (error) {
+            if (error) {
+                callback(error, false);
+                return;
+            }
+            isConnected(callback);
+        });
     }
 
 })();
