@@ -35,6 +35,6 @@ You can also use a direct url to a torrent file, deluge will download the file a
 
 Return the list of all the deluge daemon registered in the WebUI
 
-###connect(hostID, callback)
+### connect(hostID, callback)
 
 Tell the WebUI to connect to the wanted host. The result of the callback will be either TRUE if connected or FALSE if not connected.
