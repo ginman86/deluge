@@ -45,6 +45,11 @@
                 executeApiCall(function () {
                     connectToDaemon(hostID, callback);
                 }, false)
+            },
+            isConnected: function(callback) {
+                executeApiCall(function(){
+                    isConnected(callback);
+                }, false)
             }
         }
     };

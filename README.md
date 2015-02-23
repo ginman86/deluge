@@ -23,6 +23,16 @@ deluge = require('deluge')(delugeUrl, password);
 
 **password** is the password of your deluge-web server - default "deluge".
 
+## Callback
+Basic callback expected:
+```javascript
+var callback = function(error, result) {
+    if(error) {
+        console.error(error);
+        return;
+    }
+}
+```
 
 Methods
 ---
@@ -38,3 +48,7 @@ Return the list of all the deluge daemon registered in the WebUI
 ### connect(hostID, callback)
 
 Tell the WebUI to connect to the wanted host. The result of the callback will be either TRUE if connected or FALSE if not connected.
+
+### isConnected(callback)
+
+Check if the WebUI is connected to a deamon. Return true or false as result of the callback.
