@@ -30,3 +30,11 @@ Methods
 
 Call add with a magnet link to automatically post the add request to your deluge-web server. If successful, it will add and start downloading without further action.
 You can also use a direct url to a torrent file, deluge will download the file and star the download
+
+### getHosts(callback)
+
+Return the list of all the deluge daemon registered in the WebUI
+
+###connect(hostID, callback)
+
+Tell the WebUI to connect to the wanted host. The result of the callback will be either TRUE if connected or FALSE if not connected.
