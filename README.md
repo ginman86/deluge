@@ -52,3 +52,15 @@ Tell the WebUI to connect to the wanted host. The result of the callback will be
 ### isConnected(callback)
 
 Check if the WebUI is connected to a deamon. Return true or false as result of the callback.
+
+Specify cookies
+---
+If you're trying to add a torrent from a private tracker you'll most likely need to have some cookie information specified, you can do this by editing the cookies.json file. The format of the JSON should be
+
+```
+{
+	"http://www.some-private-tracker.com/": "my_cookie1=xxx;my_cookie2=yyy;"
+}
+```
+
+In the cookies.json you can see a few more examples. When adding a torrent the script will loop over all the keys in the JSON and check if any of them matches the matches the URL of the torrent that's being added. So for example if you're adding a torrent with URL 'http://www.some-private-tracker.com/someid/name.torrent' it will use the cookie information associated with 'http://www.some-private-tracker.com/'. If no key matches the URL no cookies will be used.
