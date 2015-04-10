@@ -1,5 +1,7 @@
 (function () {
     'use strict';
+    var fs = require('fs');
+    var path = require('path');
     var restler = require('restler');
     var validUrl = require('valid-url');
 
@@ -11,6 +13,8 @@
     var PASSWORD,
         DELUGE_URL,
         SESSION_COOKIE = '';
+
+    var cookies = JSON.parse(fs.readFileSync(path.join(__dirname,'cookies.json')));
 
     module.exports = function (deluge_url, password) {
         DELUGE_URL = deluge_url;
@@ -161,9 +165,18 @@
      * @param callback containing the error and the path where the torrent file have been downloaded
      */
     function downloadTorrentFile(url, callback) {
+        var cookie = '';
+        for (var key in cookies) {
+            // Check if url starts with key, see: http://stackoverflow.com/questions/646628/how-to-check-if-a-string-startswith-another-string
+            if (cookies.hasOwnProperty(key) && url.lastIndexOf(key, 0) === 0) {
+                cookie = cookies[key];
+                console.log("Using cookies for "+key);
+                break;
+          }
+        }
         post({
             method: 'web.download_torrent_from_url',
-            params: [url]
+            params: [url,cookie]
         }, callback);
     }
 
