@@ -194,19 +194,27 @@
         }, callback);
     }
 
+    /**
+     * Search for a URL in the cookie jar.
+     * @param url
+     */
+    function searchCookieJar(url){
+        var cookie = '';
+        for (var key in COOKIE_JAR) {
+            console.log('Checking inside the cookie jar...');
+            // Check if url starts with key, see: http://stackoverflow.com/q/646628/2402914
+            if (COOKIE_JAR.hasOwnProperty(key) && url.lastIndexOf(key, 0) === 0) {
+                cookie = COOKIE_JAR[key];
+                console.log("Using cookies for "+key);
+                break;
+          }
+        }
+        return cookie;
+    }
+
     function add(torrent, dlPath, callback) {
         if (validUrl.isWebUri(torrent)) {
-            var cookie = '';
-            for (var key in COOKIE_JAR) {
-                console.log('Checking inside the cookie jar...');
-                // Check if url starts with key, see: http://stackoverflow.com/q/646628/2402914
-                if (COOKIE_JAR.hasOwnProperty(key) && torrent.lastIndexOf(key, 0) === 0) {
-                    cookie = COOKIE_JAR[key];
-                    console.log("Using cookies for "+key);
-                    break;
-              }
-            }
-            downloadTorrentFile(torrent, cookie, function (error, result) {
+            downloadTorrentFile(torrent, searchCookieJar(torrent), function (error, result) {
                 if (error) {
                     callback(error);
                     return;

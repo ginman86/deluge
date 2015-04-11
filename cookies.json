@@ -1,5 +1,0 @@
-{
-	"http://example.org/": "uid=1234;pass=xxxx;",
-	"http://www.example.org/": "uid=1234;pass=xxxx;",
-	"https://www.awesome-site.com/": "h_sl=aaaa;h_sp=bbbb;h_su=cccc;"
-}
