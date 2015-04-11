@@ -53,7 +53,7 @@ Tell the WebUI to connect to the wanted host. The result of the callback will be
 
 Check if the WebUI is connected to a deamon. Return true or false as result of the callback.
 
-### setCookies(cookies)
+### setCookies(cookies, callback)
 
 If you're trying to add a torrent from a private tracker you'll most likely need to have some cookie information specified, you can do that using this method. The format of call should be
 

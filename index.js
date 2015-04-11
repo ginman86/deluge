@@ -67,19 +67,21 @@
              * {'http://example.org/': 'uid=1234;pass=xxxx;'}
              * @object cookies
              */
-            setCookies: function(cookies) {
-                setCookies(cookies);
+            setCookies: function(cookies, callback) {
+                setCookies(cookies, callback);
             }
         }
     };
 
-    function setCookies(cookies) {
+    function setCookies(cookies, callback) {
         if(cookies !== null && typeof cookies === 'object'){
             console.log('Setting new cookies');
             COOKIE_JAR = cookies;
+            callback(null,true);
         } else {
-            console.error('Invalid cookie format, should be an object. COOKIE_JAR not changed.');
+            callback('Invalid cookie format, should be an object. COOKIE_JAR not changed.',false);
         }
+
     }
 
     function authenticate(callback) {
@@ -201,7 +203,6 @@
     function searchCookieJar(url){
         var cookie = '';
         for (var key in COOKIE_JAR) {
-            console.log('Checking inside the cookie jar...');
             // Check if url starts with key, see: http://stackoverflow.com/q/646628/2402914
             if (COOKIE_JAR.hasOwnProperty(key) && url.lastIndexOf(key, 0) === 0) {
                 cookie = COOKIE_JAR[key];
