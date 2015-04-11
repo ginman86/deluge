@@ -12,9 +12,14 @@
 
     var PASSWORD,
         DELUGE_URL,
-        SESSION_COOKIE = '';
+        SESSION_COOKIE = '',
+        COOKIE_JAR = {};
 
-    var cookies = JSON.parse(fs.readFileSync(path.join(__dirname,'cookies.json')));
+    // var cookies = {
+    //     "http://example.org/": "uid=1234;pass=xxxx;",
+    //     "http://www.example.org/": "uid=1234;pass=xxxx;",
+    //     "https://www.awesome-site.com/": "h_sl=aaaa;h_sp=bbbb;h_su=cccc;"
+    // };
 
     module.exports = function (deluge_url, password) {
         DELUGE_URL = deluge_url;
@@ -50,13 +55,32 @@
                     connectToDaemon(hostID, callback);
                 }, false)
             },
+
             isConnected: function(callback) {
                 executeApiCall(function(){
                     isConnected(callback);
                 }, false)
+            },
+
+            /**
+             * Set cookies in COOKIE_JAR, cookies is an object with urls as keys, example:
+             * {'http://example.org/': 'uid=1234;pass=xxxx;'}
+             * @object cookies
+             */
+            setCookies: function(cookies) {
+                setCookies(cookies);
             }
         }
     };
+
+    function setCookies(cookies) {
+        if(cookies !== null && typeof cookies === 'object'){
+            console.log('Setting new cookies');
+            COOKIE_JAR = cookies;
+        } else {
+            console.error('Invalid cookie format, should be an object. COOKIE_JAR not changed.');
+        }
+    }
 
     function authenticate(callback) {
         function reAuth() {
@@ -139,7 +163,6 @@
             } else {
                 callback(null, result);
             }
-
         });
     }
 
@@ -164,16 +187,7 @@
      * @param url
      * @param callback containing the error and the path where the torrent file have been downloaded
      */
-    function downloadTorrentFile(url, callback) {
-        var cookie = '';
-        for (var key in cookies) {
-            // Check if url starts with key, see: http://stackoverflow.com/questions/646628/how-to-check-if-a-string-startswith-another-string
-            if (cookies.hasOwnProperty(key) && url.lastIndexOf(key, 0) === 0) {
-                cookie = cookies[key];
-                console.log("Using cookies for "+key);
-                break;
-          }
-        }
+    function downloadTorrentFile(url, cookie, callback) {
         post({
             method: 'web.download_torrent_from_url',
             params: [url,cookie]
@@ -182,7 +196,17 @@
 
     function add(torrent, dlPath, callback) {
         if (validUrl.isWebUri(torrent)) {
-            downloadTorrentFile(torrent, function (error, result) {
+            var cookie = '';
+            for (var key in COOKIE_JAR) {
+                console.log('Checking inside the cookie jar...');
+                // Check if url starts with key, see: http://stackoverflow.com/q/646628/2402914
+                if (COOKIE_JAR.hasOwnProperty(key) && torrent.lastIndexOf(key, 0) === 0) {
+                    cookie = COOKIE_JAR[key];
+                    console.log("Using cookies for "+key);
+                    break;
+              }
+            }
+            downloadTorrentFile(torrent, cookie, function (error, result) {
                 if (error) {
                     callback(error);
                     return;
