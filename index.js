@@ -15,12 +15,6 @@
         SESSION_COOKIE = '',
         COOKIE_JAR = {};
 
-    // var cookies = {
-    //     "http://example.org/": "uid=1234;pass=xxxx;",
-    //     "http://www.example.org/": "uid=1234;pass=xxxx;",
-    //     "https://www.awesome-site.com/": "h_sl=aaaa;h_sp=bbbb;h_su=cccc;"
-    // };
-
     module.exports = function (deluge_url, password) {
         DELUGE_URL = deluge_url;
         PASSWORD = password;
