@@ -1,5 +1,7 @@
 (function () {
     'use strict';
+    var fs = require('fs');
+    var path = require('path');
     var restler = require('restler');
     var validUrl = require('valid-url');
 
@@ -10,7 +12,8 @@
 
     var PASSWORD,
         DELUGE_URL,
-        SESSION_COOKIE = '';
+        SESSION_COOKIE = '',
+        COOKIE_JAR = {};
 
     module.exports = function (deluge_url, password) {
         DELUGE_URL = deluge_url;
@@ -46,13 +49,34 @@
                     connectToDaemon(hostID, callback);
                 }, false)
             },
+
             isConnected: function(callback) {
                 executeApiCall(function(){
                     isConnected(callback);
                 }, false)
+            },
+
+            /**
+             * Set cookies in COOKIE_JAR, cookies is an object with urls as keys, example:
+             * {'http://example.org/': 'uid=1234;pass=xxxx;'}
+             * @object cookies
+             */
+            setCookies: function(cookies, callback) {
+                setCookies(cookies, callback);
             }
         }
     };
+
+    function setCookies(cookies, callback) {
+        if(cookies !== null && typeof cookies === 'object'){
+            console.log('Setting new cookies');
+            COOKIE_JAR = cookies;
+            callback(null,true);
+        } else {
+            callback('Invalid cookie format, should be an object. COOKIE_JAR not changed.',false);
+        }
+
+    }
 
     function authenticate(callback) {
         function reAuth() {
@@ -135,7 +159,6 @@
             } else {
                 callback(null, result);
             }
-
         });
     }
 
@@ -160,16 +183,33 @@
      * @param url
      * @param callback containing the error and the path where the torrent file have been downloaded
      */
-    function downloadTorrentFile(url, callback) {
+    function downloadTorrentFile(url, cookie, callback) {
         post({
             method: 'web.download_torrent_from_url',
-            params: [url]
+            params: [url,cookie]
         }, callback);
+    }
+
+    /**
+     * Search for a URL in the cookie jar.
+     * @param url
+     */
+    function searchCookieJar(url){
+        var cookie = '';
+        for (var key in COOKIE_JAR) {
+            // Check if url starts with key, see: http://stackoverflow.com/q/646628/2402914
+            if (COOKIE_JAR.hasOwnProperty(key) && url.lastIndexOf(key, 0) === 0) {
+                cookie = COOKIE_JAR[key];
+                console.log("Using cookies for "+key);
+                break;
+          }
+        }
+        return cookie;
     }
 
     function add(torrent, dlPath, callback) {
         if (validUrl.isWebUri(torrent)) {
-            downloadTorrentFile(torrent, function (error, result) {
+            downloadTorrentFile(torrent, searchCookieJar(torrent), function (error, result) {
                 if (error) {
                     callback(error);
                     return;
