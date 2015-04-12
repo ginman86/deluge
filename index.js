@@ -73,7 +73,7 @@
             COOKIE_JAR = cookies;
             callback(null,true);
         } else {
-            callback('Invalid cookie format, should be an object. COOKIE_JAR not changed.',false);
+            callback(new Error('Invalid cookie format, should be an object. COOKIE_JAR not changed.'),false);
         }
 
     }
