@@ -62,3 +62,14 @@ setCookies({"http://www.some-private-tracker.com/": "my_cookie1=xxx;my_cookie2=y
 ```
 
 All cookies will be kept private. When adding a torrent the script will loop over all the keys in the object and check if any of them matches the URL of the torrent that's being added. So for example if you're adding a torrent with URL 'http://www.some-private-tracker.com/someid/name.torrent' it will use the cookie information associated with 'http://www.some-private-tracker.com/'. If no key matches the URL, no cookies will be used.
+
+### getTorrentRecord(callback)
+
+Get the list of all torrents and changing data that represents their status in the WebUI.
+Expect a returned json object as a result of the callback, with the following properties:
+```json
+    "connected": true,
+    "filters": {...},
+    "stats": {...},
+    "torrents":{...}
+```

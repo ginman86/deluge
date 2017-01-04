@@ -51,7 +51,7 @@
             },
 
             isConnected: function(callback) {
-                executeApiCall(function(){
+                executeApiCall(function () {
                     isConnected(callback);
                 }, false)
             },
@@ -61,8 +61,18 @@
              * {'http://example.org/': 'uid=1234;pass=xxxx;'}
              * @object cookies
              */
-            setCookies: function(cookies, callback) {
+            setCookies: function (cookies, callback) {
                 setCookies(cookies, callback);
+            },
+
+            /**
+             * Get the list of all torrents and changing data that represents their status in the WebUI
+             * @param callback
+             */
+            getTorrentRecord: function (callback) {
+                executeApiCall(function () {
+                    getTorrentRecord(callback);
+                })
             }
         }
     };
@@ -296,6 +306,37 @@
             }
             isConnected(callback);
         });
+    }
+
+    function getTorrentRecord(callback) {
+        post({
+            method: 'web.update_ui',
+            params: [[
+                'queue',
+                'name',
+                'total_wanted',
+                'state',
+                'progress',
+                'num_seeds',
+                'total_seeds',
+                'num_peers',
+                'total_peers',
+                'download_payload_rate',
+                'upload_payload_rate',
+                'eta',
+                'ratio',
+                'distributed_copies',
+                'is_auto_managed',
+                'time_added',
+                'tracker_host',
+                'save_path',
+                'total_done',
+                'total_uploaded',
+                'max_download_speed',
+                'max_upload_speed',
+                'seeds_peers_ratio'
+            ], {}]
+        }, callback);
     }
 
 })();
