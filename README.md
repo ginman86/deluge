@@ -42,7 +42,7 @@ Call add with a magnet link to automatically post the add request to your deluge
 You can also use a direct url to a torrent file, deluge will download the file and start the download.
 It is also possible to substitute dlpath with your own options by providing a json object instead.
 Default options are:
-```json
+```
 {
   file_priorities: [],
   add_paused: false,
