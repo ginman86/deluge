@@ -39,7 +39,22 @@ Methods
 ### add(magnet, dlpath, callback) or add(file, dlpath, callback) or add(url, dlpath, callback)
 
 Call add with a magnet link to automatically post the add request to your deluge-web server. If successful, it will add and start downloading without further action.
-You can also use a direct url to a torrent file, deluge will download the file and star the download
+You can also use a direct url to a torrent file, deluge will download the file and start the download.
+It is also possible to substitute dlpath with your own options by providing a json object instead.
+Default options are:
+```json
+{
+  file_priorities: [],
+  add_paused: false,
+  compact_allocation: true,
+  download_location: dlPath,
+  max_connections: -1,
+  max_download_speed: -1,
+  max_upload_slots: -1,
+  max_upload_speed: -1,
+  prioritize_first_last_pieces: false
+}
+```
 
 ### getHosts(callback)
 
