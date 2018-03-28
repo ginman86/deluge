@@ -246,7 +246,7 @@
             prioritize_first_last_pieces: false
         }
         var isObj = function (obj) {return obj !== undefined && obj !== null && obj.constructor == Object; }
-        dlPath = (isObj(dlPath) ? dlPath : config);
+        config = (isObj(dlPath) ? dlPath : config);
         post({
             method: 'web.add_torrents',
             params: [[{
