@@ -234,21 +234,24 @@
 
     function addTorrent(magnet, dlPath, callback) {
         console.log("Adding: " + magnet);
+        var config = {
+            file_priorities: [],
+            add_paused: false,
+            compact_allocation: true,
+            download_location: dlPath,
+            max_connections: -1,
+            max_download_speed: -1,
+            max_upload_slots: -1,
+            max_upload_speed: -1,
+            prioritize_first_last_pieces: false
+        }
+        var isObj = function (obj) {return obj !== undefined && obj !== null && obj.constructor == Object; }
+        config = (isObj(dlPath) ? dlPath : config);
         post({
             method: 'web.add_torrents',
             params: [[{
                 path: magnet,
-                options: {
-                    file_priorities: [],
-                    add_paused: false,
-                    compact_allocation: true,
-                    download_location: dlPath,
-                    max_connections: -1,
-                    max_download_speed: -1,
-                    max_upload_slots: -1,
-                    max_upload_speed: -1,
-                    prioritize_first_last_pieces: false
-                }
+                options: config
             }]]
         }, callback);
     }
