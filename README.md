@@ -88,3 +88,7 @@ Expect a returned json object as a result of the callback, with the following pr
     "stats": {...},
     "torrents":{...}
 ```
+
+### addTrackers(guid, callback)
+
+Use the list of getTorrentRecord to get each GUID. Then loop through data, and add trackers accordingly.
